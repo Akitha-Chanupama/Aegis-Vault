@@ -51,3 +51,4 @@ export class RateLimiter {
 export const authRateLimiter = new RateLimiter(5, 60 * 1000); // 5 attempts per minute
 export const keyRateLimiter = new RateLimiter(10, 60 * 1000); // 10 attempts per minute
 export const uploadRateLimiter = new RateLimiter(30, 60 * 1000); // 30 requests per minute
+

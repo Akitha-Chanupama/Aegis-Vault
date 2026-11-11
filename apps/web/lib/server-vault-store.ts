@@ -1,6 +1,6 @@
 import {
-  VaultKeyEnvelope,
-  ItemEncryptionEnvelope,
+  type VaultKeyEnvelope,
+  type ItemEncryptionEnvelope,
   AegisError,
   AegisErrorCode,
 } from "@aegis/shared";

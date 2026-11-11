@@ -34,6 +34,12 @@ import {
   uint8ArrayToBase64,
   base64ToUint8Array,
 } from "@aegis/crypto";
+import {
+  saveEncryptedEnvelopesToStorage,
+  loadEncryptedEnvelopesFromStorage,
+  saveKeyEnvelopeToStorage,
+  loadKeyEnvelopeFromStorage,
+} from "@/lib/offline-storage";
 
 // Synthetic initial demonstration data (Purely fake test accounts)
 const SYNTHETIC_USER_ID = "00000000-0000-4000-8000-000000000001";
@@ -143,6 +149,17 @@ export default function VaultPage() {
   useEffect(() => {
     async function setupDemoVault() {
       try {
+        // 1. Check if user already has cached key envelope and ciphertext envelopes
+        const cachedKeyEnvelope = loadKeyEnvelopeFromStorage();
+        const cachedEnvelopes = loadEncryptedEnvelopesFromStorage();
+        if (cachedKeyEnvelope && cachedEnvelopes && cachedEnvelopes.length > 0) {
+          keyEnvelopeRef.current = cachedKeyEnvelope;
+          setEnvelopes(cachedEnvelopes);
+          setIsInitialized(true);
+          setIsLocked(true);
+          return;
+        }
+
         const vrk = await generateVaultRootKey();
         const salt = generateKdfSalt();
         const testParams = { m: 16384, t: 1, p: 1 }; // Fast for dev client UI
@@ -232,6 +249,8 @@ export default function VaultPage() {
           initialEnvelopes.push(env);
         }
 
+        saveKeyEnvelopeToStorage(keyEnvelopeRef.current);
+        saveEncryptedEnvelopesToStorage(initialEnvelopes);
         setEnvelopes(initialEnvelopes);
         setIsInitialized(true);
         setIsLocked(true);
@@ -345,12 +364,15 @@ export default function VaultPage() {
     // Update envelopes (ciphertext)
     setEnvelopes((prev) => {
       const idx = prev.findIndex((e) => e.itemId === id);
+      let next: ItemEncryptionEnvelope[];
       if (idx >= 0) {
-        const next = [...prev];
+        next = [...prev];
         next[idx] = newEnvelope;
-        return next;
+      } else {
+        next = [newEnvelope, ...prev];
       }
-      return [newEnvelope, ...prev];
+      saveEncryptedEnvelopesToStorage(next);
+      return next;
     });
 
     // Update decrypted in-memory items
@@ -383,6 +405,27 @@ export default function VaultPage() {
     setDecryptedItems((prev) =>
       prev.map((i) => (i.id === itemId ? { ...i, isDeleted: true } : i))
     );
+
+    const vrk = vrkRef.current;
+    if (vrk) {
+      const item = decryptedItems.find((i) => i.id === itemId);
+      if (item) {
+        const updatedPayload = { ...(item.payload as any), isDeleted: true };
+        const newEnvelope = await encryptItemEnvelope(
+          vrk,
+          SYNTHETIC_VAULT_ID,
+          itemId,
+          item.kind,
+          item.revision + 1,
+          updatedPayload
+        );
+        setEnvelopes((prev) => {
+          const next = prev.map((e) => (e.itemId === itemId ? newEnvelope : e));
+          saveEncryptedEnvelopesToStorage(next);
+          return next;
+        });
+      }
+    }
   };
 
   // Toggle Favorite
@@ -424,6 +467,9 @@ export default function VaultPage() {
       recoveryMetadata: { nonce: recoveryNonce },
     };
 
+    saveKeyEnvelopeToStorage(keyEnvelopeRef.current);
+    saveEncryptedEnvelopesToStorage([]);
+
     vrkRef.current = vrk;
     setEnvelopes([]);
     setDecryptedItems([]);
@@ -456,6 +502,7 @@ export default function VaultPage() {
         kdfSalt: uint8ArrayToBase64(newSalt),
       };
 
+      saveKeyEnvelopeToStorage(keyEnvelopeRef.current);
       return true;
     } catch {
       return false;
@@ -490,6 +537,7 @@ export default function VaultPage() {
         return;
       }
       setEnvelopes(bundle.envelopes);
+      saveEncryptedEnvelopesToStorage(bundle.envelopes);
       alert("Envelopes imported successfully. Unlock vault to view contents.");
     } catch {
       alert("Failed to parse vault backup JSON file.");

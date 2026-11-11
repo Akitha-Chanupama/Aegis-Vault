@@ -1,6 +1,6 @@
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert";
-import { serverVaultStore } from "../../apps/web/lib/server-vault-store.js";
+import { serverVaultStore } from "../../apps/web/lib/server-vault-store.ts";
 import { AegisError, AegisErrorCode, type ItemEncryptionEnvelope } from "@aegis/shared";
 
 describe("Aegis Server & Sync Concurrency Integration Test Suite", () => {
