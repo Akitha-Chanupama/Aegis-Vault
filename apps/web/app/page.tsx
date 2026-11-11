@@ -31,6 +31,8 @@ import {
   wrapWithRecoveryKey,
   unwrapWithRecoveryKey,
   DEFAULT_ARGON2_PARAMS,
+  uint8ArrayToBase64,
+  base64ToUint8Array,
 } from "@aegis/crypto";
 
 // Synthetic initial demonstration data (Purely fake test accounts)
@@ -44,10 +46,52 @@ export default function VaultPage() {
   const [currentCategory, setCurrentCategory] = useState<NavCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [autoLockMinutes, setAutoLockMinutes] = useState(5);
+  const [isOnline, setIsOnline] = useState(true);
+
+  // Search input ref for keyboard shortcut focusing
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   // Cryptographic In-Memory Key References (Purged on Lock)
   const vrkRef = useRef<CryptoKey | null>(null);
   const keyEnvelopeRef = useRef<VaultKeyEnvelope | null>(null);
+
+  // Online / Offline Network Listener
+  useEffect(() => {
+    setIsOnline(typeof navigator !== "undefined" ? navigator.onLine : true);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Global Keyboard Shortcuts (Ctrl+K: Search, Ctrl+N: Quick Add, Ctrl+L: Lock)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+
+      if (isCmdOrCtrl && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
+        searchInput?.focus();
+      } else if (isCmdOrCtrl && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        setSelectedItem(null);
+        setModalKind("login");
+        setIsModalOpen(true);
+      } else if (isCmdOrCtrl && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        handleLockVault();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLocked]);
 
   // In-Memory Persistent Envelopes (Ciphertext only)
   const [envelopes, setEnvelopes] = useState<ItemEncryptionEnvelope[]>([]);
@@ -117,7 +161,7 @@ export default function VaultPage() {
           cryptoVersion: 1,
           wrappedRootKey,
           wrapNonce,
-          kdfSalt: Buffer.from(salt).toString("base64"),
+          kdfSalt: uint8ArrayToBase64(salt),
           kdfParams: testParams,
         };
 
@@ -205,7 +249,7 @@ export default function VaultPage() {
 
     try {
       const { wrappedRootKey, wrapNonce, kdfSalt, kdfParams } = keyEnvelopeRef.current;
-      const saltBytes = Buffer.from(kdfSalt, "base64");
+      const saltBytes = base64ToUint8Array(kdfSalt);
       const kekBytes = await deriveKeyArgon2id(passphrase, saltBytes, kdfParams);
       const kek = await importRawKey(kekBytes);
 
@@ -374,7 +418,7 @@ export default function VaultPage() {
       cryptoVersion: 1,
       wrappedRootKey,
       wrapNonce,
-      kdfSalt: Buffer.from(salt).toString("base64"),
+      kdfSalt: uint8ArrayToBase64(salt),
       kdfParams: testParams,
       recoveryWrappedKey,
       recoveryMetadata: { nonce: recoveryNonce },
@@ -409,7 +453,7 @@ export default function VaultPage() {
         ...keyEnvelopeRef.current,
         wrappedRootKey,
         wrapNonce,
-        kdfSalt: Buffer.from(newSalt).toString("base64"),
+        kdfSalt: uint8ArrayToBase64(newSalt),
       };
 
       return true;
@@ -548,8 +592,15 @@ export default function VaultPage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           itemCounts={itemCounts}
-          syncStatus="synced"
+          syncStatus={isOnline ? "synced" : "offline"}
         >
+          {/* Offline Warning Banner */}
+          {!isOnline && (
+            <div className="mb-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center justify-between">
+              <span>You are currently offline. Vault entries remain accessible in memory. Edits will sync once connection resumes.</span>
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-amber-500/20">Offline Mode</span>
+            </div>
+          )}
           {/* Dashboard Overview */}
           {currentCategory === "all" && !searchQuery && (
             <DashboardOverview

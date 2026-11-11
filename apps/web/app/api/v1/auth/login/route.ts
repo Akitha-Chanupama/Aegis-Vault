@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoginRequestSchema } from "@aegis/shared";
+import { authRateLimiter } from "@/lib/rate-limiter";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+  const { allowed, resetMs } = authRateLimiter.isAllowed(ip);
+
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "RATE_LIMITED",
+          message: `Too many login attempts. Please wait ${Math.ceil(resetMs / 1000)} seconds.`,
+        },
+      },
+      { status: 429, headers: { "Retry-After": Math.ceil(resetMs / 1000).toString() } }
+    );
+  }
+
   try {
     const body = await req.json();
     const { email, password } = LoginRequestSchema.parse(body);
