@@ -45,3 +45,4 @@ export function stringToUtf8(str: string): Uint8Array {
 export function utf8ToString(bytes: Uint8Array): string {
   return new TextDecoder().decode(bytes);
 }
+

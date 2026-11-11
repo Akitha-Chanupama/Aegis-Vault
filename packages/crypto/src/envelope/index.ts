@@ -134,3 +134,4 @@ export async function unwrapVaultRootKey(
 
   return await unwrapKeyWithAad(wrappedKeyBytes, nonceBytes, kek, aad);
 }
+

@@ -151,3 +151,4 @@ Storing large encrypted media files (documents, high-resolution photos) requires
    - All references to `VRK` and `KEK` are nulled out.
    - Ephemeral decrypted item caches in TanStack Query are immediately evicted via `queryClient.clear()`.
    - Revoke all active ephemeral image preview `blob:` URLs via `URL.revokeObjectURL()`.
+

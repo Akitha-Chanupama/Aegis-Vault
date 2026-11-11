@@ -217,3 +217,4 @@ describe("Aegis Cryptographic Protocol Test Suite", () => {
     assert.deepStrictEqual(rawVrkBefore, rawVrkAfter);
   });
 });
+

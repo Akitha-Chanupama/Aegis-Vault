@@ -21,3 +21,4 @@ A zero-knowledge vault must prevent both passive eavesdropping and active cipher
 ## Consequences
 - Prevents ciphertext transplant and downgrade attacks.
 - Passphrase changes only require rewrapping the VRK without re-encrypting the vault database.
+

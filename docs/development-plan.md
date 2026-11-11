@@ -11,3 +11,4 @@
 | **M4** | Encrypted Media Locker & Personal Records | Chunked AES-GCM file encryption, client-side thumbnail generator, private gallery, encrypted document upload/download, structured personal records. | Bounded memory usage during file encryption; EXIF data stripped locally; verified encrypted preview. |
 | **M5** | Cross-Device Sync, Recovery & Mobile PWA | Monotonic change cursor sync, revision conflict detection UI, 24-word recovery phrase generator & vault recovery, PWA install manifest. | Concurrent edit conflict resolution test without data loss; recovery phrase restores vault key. |
 | **M6** | Security Validation, Hardening & Release Audit | Security test suite (tampered tags, swapped IDs, replay attacks), CSP validation, accessibility audit (WCAG 2.2 AA), release readiness report. | All security gates in §19 verified. |
+

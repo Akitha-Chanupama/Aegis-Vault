@@ -28,12 +28,27 @@ interface StoredSyncEvent {
   createdAt: string;
 }
 
+interface StoredFileObject {
+  id: string;
+  vaultId: string;
+  itemId: string;
+  storageKey: string;
+  encryptedManifest: string;
+  chunkCount: number;
+  ciphertextBytes: number;
+  status: "INITIATED" | "COMMITTED" | "DELETED";
+  createdAt: string;
+  updatedAt: string;
+}
+
 class ServerVaultStore {
   private users = new Map<string, StoredUser>();
   private keyEnvelopes = new Map<string, VaultKeyEnvelope>(); // vaultId -> envelope
   private items = new Map<string, StoredItemRecord>(); // `${vaultId}:${itemId}` -> record
+  private files = new Map<string, StoredFileObject>(); // fileId -> file record
   private syncEvents: StoredSyncEvent[] = [];
   private currentSeq = 1;
+  private readonly MAX_VAULT_QUOTA_BYTES = 1024 * 1024 * 1024; // 1 GB Quota
 
   constructor() {
     // Seed default synthetic user and vault for development
@@ -161,6 +176,101 @@ class ServerVaultStore {
     this.recordSyncEvent(vaultId, itemId, nextRevision, "DELETE");
   }
 
+  // Encrypted Blob Storage Operations
+  public initiateFileUpload(
+    vaultId: string,
+    itemId: string,
+    chunkCount: number,
+    ciphertextBytes: number
+  ): { fileId: string; storageKey: string; uploadUrls: string[] } {
+    // 1. Quota Enforcement
+    let currentUsage = 0;
+    for (const file of this.files.values()) {
+      if (file.vaultId === vaultId && file.status === "COMMITTED") {
+        currentUsage += file.ciphertextBytes;
+      }
+    }
+
+    if (currentUsage + ciphertextBytes > this.MAX_VAULT_QUOTA_BYTES) {
+      throw new AegisError(
+        AegisErrorCode.FILE_TOO_LARGE,
+        `Storage quota exceeded. Used ${currentUsage} of ${this.MAX_VAULT_QUOTA_BYTES} bytes.`,
+        413
+      );
+    }
+
+    const fileId = crypto.randomUUID();
+    const storageKey = crypto.randomUUID(); // Random opaque UUID key; NEVER user filename
+
+    const uploadUrls: string[] = [];
+    for (let i = 0; i < chunkCount; i++) {
+      uploadUrls.push(`https://s3.local.aegis/upload/${storageKey}/chunk-${i}?token=${crypto.randomUUID()}`);
+    }
+
+    this.files.set(fileId, {
+      id: fileId,
+      vaultId,
+      itemId,
+      storageKey,
+      encryptedManifest: "",
+      chunkCount,
+      ciphertextBytes,
+      status: "INITIATED",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return { fileId, storageKey, uploadUrls };
+  }
+
+  public commitFileUpload(
+    vaultId: string,
+    fileId: string,
+    encryptedManifest: string
+  ): void {
+    const file = this.files.get(fileId);
+    if (!file || file.vaultId !== vaultId) {
+      throw new AegisError(AegisErrorCode.NOT_FOUND, "File not found.", 404);
+    }
+
+    if (!encryptedManifest) {
+      throw new AegisError(AegisErrorCode.INVALID_ENVELOPE, "Encrypted manifest is required.", 400);
+    }
+
+    file.encryptedManifest = encryptedManifest;
+    file.status = "COMMITTED";
+    file.updatedAt = new Date().toISOString();
+  }
+
+  public downloadFile(vaultId: string, fileId: string): { storageKey: string; chunkCount: number; encryptedManifest: string; downloadUrls: string[] } {
+    const file = this.files.get(fileId);
+    if (!file || file.vaultId !== vaultId || file.status !== "COMMITTED") {
+      throw new AegisError(AegisErrorCode.NOT_FOUND, "File not found or not committed.", 404);
+    }
+
+    const downloadUrls: string[] = [];
+    for (let i = 0; i < file.chunkCount; i++) {
+      downloadUrls.push(`https://s3.local.aegis/download/${file.storageKey}/chunk-${i}?token=${crypto.randomUUID()}`);
+    }
+
+    return {
+      storageKey: file.storageKey,
+      chunkCount: file.chunkCount,
+      encryptedManifest: file.encryptedManifest,
+      downloadUrls,
+    };
+  }
+
+  public deleteFile(vaultId: string, fileId: string): void {
+    const file = this.files.get(fileId);
+    if (!file || file.vaultId !== vaultId) {
+      throw new AegisError(AegisErrorCode.NOT_FOUND, "File not found.", 404);
+    }
+
+    file.status = "DELETED";
+    file.updatedAt = new Date().toISOString();
+  }
+
   // Sync Delta Engine
   private recordSyncEvent(
     vaultId: string,
@@ -211,3 +321,4 @@ export const serverVaultStore = global.aegisServerStore ?? new ServerVaultStore(
 if (process.env.NODE_ENV !== "production") {
   global.aegisServerStore = serverVaultStore;
 }
+

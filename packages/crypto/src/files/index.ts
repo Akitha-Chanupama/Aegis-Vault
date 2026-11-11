@@ -91,3 +91,4 @@ export async function decryptManifest(
   const decryptedBytes = await decryptAesGcm(fileKey, ciphertextBytes, nonceBytes, aad);
   return JSON.parse(utf8ToString(decryptedBytes));
 }
+

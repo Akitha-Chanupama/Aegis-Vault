@@ -38,3 +38,4 @@ Aegis Vault enforces strict end-to-end zero-knowledge encryption. By mathematica
 
 > [!CAUTION]
 > If **both** the Master Vault Passphrase and the 24-Word Recovery Phrase are lost, **all encrypted records are permanently unrecoverable**. There are no backdoors, recovery master keys, or support overrides.
+

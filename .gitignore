@@ -37,3 +37,4 @@ coverage/
 # Prisma
 packages/database/prisma/*.db
 packages/database/prisma/*.db-journal
+

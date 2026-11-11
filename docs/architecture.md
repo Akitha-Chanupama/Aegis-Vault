@@ -118,3 +118,4 @@ While ciphertext is completely unreadable to the server, certain metadata is str
 - **Item Kind:** The item type in `vault_items` can be an opaque category or encrypted inside the payload. In v1, item type is preserved at envelope level for fast item filtering, while all titles, websites, usernames, tags, and notes are strictly inside the ciphertext payload.
 - **File Names:** Original filenames, MIME types, and file extensions are encrypted inside the item envelope. S3 storage keys are purely random UUIDv4 strings.
 - **Timestamps:** Item creation/modification timestamps are encrypted inside the payload; server maintains only coarse `server_updated_at` for sync coordination.
+

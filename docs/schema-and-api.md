@@ -169,3 +169,4 @@ All requests and responses use `application/json`. Errors return standard JSON:
 - `POST /api/v1/files/:id/commit`: Confirms all chunks uploaded. Validates S3 chunk sizes and persists encrypted manifest.
 - `GET /api/v1/files/:id/download`: Returns short-lived (15 minute) scoped pre-signed URLs for encrypted chunks.
 - `DELETE /api/v1/files/:id`: Queues blob deletion from S3.
+

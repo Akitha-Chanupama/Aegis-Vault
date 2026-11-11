@@ -148,3 +148,4 @@ This threat model follows the **STRIDE** methodology (Spoofing, Tampering, Repud
   - `Cache-Control: no-store` prevents caching of ciphertext in HTTP or service-worker caches.
   - Metadata minimized: no plaintext search index on server; no original filenames stored unencrypted.
 - **Residual Risk:** S3 versioning or cloud snapshot retention windows may retain encrypted ciphertext until lifecycle expiration.
+

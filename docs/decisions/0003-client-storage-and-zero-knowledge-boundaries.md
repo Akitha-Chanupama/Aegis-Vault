@@ -16,3 +16,4 @@ Persistent browser storage (`localStorage`, `sessionStorage`, `IndexedDB`) is vu
 ## Consequences
 - Maximizes security against data extraction at rest on the client.
 - Closing or reloading the tab locks the vault and requires passphrase re-entry.
+

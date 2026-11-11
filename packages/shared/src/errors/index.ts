@@ -23,3 +23,4 @@ export class AegisError extends Error {
     this.name = "AegisError";
   }
 }
+

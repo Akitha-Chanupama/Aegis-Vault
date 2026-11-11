@@ -84,3 +84,4 @@ npm run dev
 5. **Log Redaction:**
    - Server logs MUST NEVER record request bodies containing passwords, passphrases, notes, or raw ciphertext.
    - User IPs are truncated/anonymized in application logs.
+

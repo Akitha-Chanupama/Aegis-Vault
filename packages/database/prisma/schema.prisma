@@ -119,3 +119,4 @@ model SyncEvent {
   @@index([vaultId, seq])
   @@map("sync_events")
 }
+

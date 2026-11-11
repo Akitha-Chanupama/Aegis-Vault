@@ -43,3 +43,4 @@ export function SyncStatusBadge({ status, className }: SyncStatusBadgeProps) {
     </div>
   );
 }
+

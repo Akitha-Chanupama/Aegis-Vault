@@ -19,3 +19,4 @@ Aegis Vault requires an end-to-end client-side encrypted architecture accessible
 ## Consequences
 - **Positive:** Cryptographic logic is strictly isolated from UI rendering and React hydration loops. Strong compile-time typing across API boundaries.
 - **Tradeoff:** Monorepo package management requires disciplined dependency management.
+

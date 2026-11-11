@@ -20,3 +20,4 @@ Many web applications conflate login credentials with encryption keys, meaning s
 ## Consequences
 - Requires users to manage both a login credential and a vault passphrase (or secure recovery key).
 - Ensures absolute zero-knowledge guarantees even against subpoena or database exfiltration.
+

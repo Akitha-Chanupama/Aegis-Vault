@@ -39,3 +39,4 @@ export async function deriveKeyArgon2id(
 export function generateKdfSalt(): Uint8Array {
   return getRandomBytes(16);
 }
+

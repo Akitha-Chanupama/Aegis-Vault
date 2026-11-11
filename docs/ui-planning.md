@@ -128,3 +128,4 @@ The design system will reside in `apps/web/components/vault/` and follow atomic 
 - `UploadDropzone`: Drag-and-drop zone with MIME validation and encrypted chunking progress bar.
 - `ConfirmDialog`: Radix UI alert dialog for permanent deletion and destructive key actions.
 - `SyncStatus`: Subtle badge showing "Synced", "Syncing...", or "Offline (Cached)".
+
