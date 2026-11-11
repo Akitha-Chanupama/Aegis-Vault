@@ -1,0 +1,20 @@
+{
+  "name": "aegis-vault",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @aegis/web",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint -w @aegis/web",
+    "typecheck": "npm run typecheck --workspaces",
+    "db:generate": "npm run db:generate -w @aegis/database"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

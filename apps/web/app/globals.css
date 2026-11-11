@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark Theme as Primary Default */
+  --bg-app: #0B1020;
+  --surface-1: #121A2A;
+  --surface-2: #192338;
+  --surface-3: #222E48;
+  --border-subtle: #242F46;
+  --border-strong: #374669;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+
+  --accent: #8B7CF6;
+  --accent-hover: #A79AFB;
+  --accent-muted: rgba(139, 124, 246, 0.15);
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+
+  --radius-card: 16px;
+}
+
+[data-theme="light"] {
+  --bg-app: #F8FAFC;
+  --surface-1: #FFFFFF;
+  --surface-2: #F1F5F9;
+  --surface-3: #E2E8F0;
+  --border-subtle: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+
+  --accent: #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-muted: rgba(99, 102, 241, 0.1);
+
+  --success: #059669;
+  --warning: #D97706;
+  --danger: #DC2626;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Mobile safe area handling */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Reduced motion compliance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

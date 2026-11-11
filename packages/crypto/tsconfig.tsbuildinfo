@@ -1,0 +1,1 @@
+{"root":["./src/crypto.test.ts","./src/index.ts","./src/envelope/index.ts","./src/files/index.ts","./src/kdf/argon2.ts","./src/primitives/aes.ts","./src/primitives/utils.ts","./src/recovery/index.ts"],"version":"5.9.3"}

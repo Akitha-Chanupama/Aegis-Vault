@@ -1,0 +1,121 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String      @id @default(uuid())
+  email           String      @unique
+  passwordHash    String      // Hashed credentials for account login only
+  emailVerifiedAt DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  vault           Vault?
+  sessions        Session[]
+  items           VaultItem[]
+
+  @@map("users")
+}
+
+model Session {
+  id          String   @id @default(uuid())
+  userId      String
+  tokenHash   String   @unique
+  userAgent   String?
+  ipAddress   String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Vault {
+  id                   String      @id @default(uuid())
+  ownerUserId          String      @unique
+  cryptoVersion        Int         @default(1)
+  wrappedRootKey       String      // Base64-encoded AES-GCM wrapped VRK
+  wrapNonce            String      // Base64-encoded 12-byte nonce
+  kdfSalt              String      // Base64-encoded 16-byte random salt
+  kdfParamsJson        String      // JSON string: { "m": 65536, "t": 3, "p": 4 }
+  recoveryWrappedKey   String?     // Base64-encoded VRK wrapped under Recovery KEK
+  recoveryMetadataJson String?     // Nonsecret parameters for recovery KDF
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  user                 User        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  items                VaultItem[]
+  files                FileObject[]
+  syncEvents           SyncEvent[]
+
+  @@map("vaults")
+}
+
+model VaultItem {
+  id               String       @id @default(uuid())
+  vaultId          String
+  ownerUserId      String
+  opaqueItemType   String       // "login" | "note" | "card" | "document" | "identity"
+  encryptedPayload String       // Base64 ciphertext + GCM tag
+  nonce            String       // Base64 12-byte nonce
+  cryptoVersion    Int          @default(1)
+  revision         Int          @default(1)
+  isDeleted        Boolean      @default(false)
+  serverUpdatedAt  DateTime     @updatedAt
+  createdAt        DateTime     @default(now())
+
+  vault            Vault        @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  user             User         @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  files            FileObject[]
+
+  @@unique([vaultId, id])
+  @@index([vaultId, isDeleted, serverUpdatedAt])
+  @@map("vault_items")
+}
+
+enum FileStatus {
+  INITIATED
+  COMMITTED
+  DELETED
+}
+
+model FileObject {
+  id                String     @id @default(uuid())
+  vaultId           String
+  itemId            String
+  storageKey        String     @unique // Random UUID; never original filename
+  encryptedManifest String     // Base64 ciphertext containing chunk count, original name, etc.
+  chunkCount        Int
+  ciphertextBytes   BigInt
+  status            FileStatus @default(INITIATED)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  vault             Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  item              VaultItem  @relation(fields: [vaultId, itemId], references: [vaultId, id], onDelete: Cascade)
+
+  @@index([vaultId, itemId])
+  @@map("file_objects")
+}
+
+model SyncEvent {
+  seq       BigInt   @id @default(autoincrement())
+  vaultId   String
+  itemId    String
+  revision  Int
+  eventType String   // "CREATE" | "UPDATE" | "DELETE" | "RESTORE"
+  createdAt DateTime @default(now())
+
+  vault     Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@index([vaultId, seq])
+  @@map("sync_events")
+}
