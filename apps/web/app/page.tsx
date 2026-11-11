@@ -36,7 +36,7 @@ import {
 // Synthetic initial demonstration data (Purely fake test accounts)
 const SYNTHETIC_USER_ID = "00000000-0000-4000-8000-000000000001";
 const SYNTHETIC_VAULT_ID = "00000000-0000-4000-8000-000000000002";
-const DEFAULT_PASSPHRASE = "aegis-demo-vault-2026!";
+const DEFAULT_PASSPHRASE = "12345678";
 
 export default function VaultPage() {
   const [isInitialized, setIsInitialized] = useState(false);

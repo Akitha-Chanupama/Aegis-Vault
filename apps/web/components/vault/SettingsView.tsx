@@ -62,8 +62,8 @@ export function SettingsView({
       setPassStatus("New passphrases do not match.");
       return;
     }
-    if (newPass.length < 12) {
-      setPassStatus("New passphrase must be at least 12 characters.");
+    if (newPass.length < 8) {
+      setPassStatus("New passphrase must be at least 8 characters.");
       return;
     }
 

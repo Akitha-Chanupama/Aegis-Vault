@@ -89,15 +89,22 @@ export function VaultLockScreen({
             </div>
           ) : (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">
-                Vault Passphrase
-              </label>
+              <div className="flex justify-between items-center text-xs font-medium text-slate-300">
+                <label>Vault Passphrase</label>
+                <button
+                  type="button"
+                  onClick={() => setPassphrase("12345678")}
+                  className="text-[11px] text-purple-400 hover:text-purple-300 font-mono transition-colors"
+                >
+                  Demo key: <span className="underline font-bold">12345678</span>
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type="password"
                   value={passphrase}
                   onChange={(e) => setPassphrase(e.target.value)}
-                  placeholder="Enter your master passphrase"
+                  placeholder="Enter vault passphrase (e.g. 12345678)"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-slate-200 focus:border-purple-500 focus:outline-none pr-10"
                   required
                   autoFocus

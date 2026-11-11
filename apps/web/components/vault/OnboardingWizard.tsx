@@ -43,8 +43,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const handleStep1Next = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (passphrase.length < 12) {
-      setError("Passphrase must be at least 12 characters.");
+    if (passphrase.length < 8) {
+      setError("Passphrase must be at least 8 characters.");
       return;
     }
     if (passphrase !== confirmPassphrase) {
