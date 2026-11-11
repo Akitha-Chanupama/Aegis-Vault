@@ -9,11 +9,12 @@
   "scripts": {
     "dev": "npm run dev -w @aegis/web",
     "build": "npm run build --workspaces",
+    "build:packages": "npm run build -w @aegis/shared -w @aegis/crypto",
     "test": "npm run test --workspaces --if-present",
     "test:security": "node --experimental-strip-types --test tests/security/crypto-tamper.test.ts tests/integration/api-concurrency.test.ts",
     "test:all": "npm test && npm run test:security",
     "lint": "npm run lint -w @aegis/web",
-    "typecheck": "npm run typecheck --workspaces",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces",
     "db:generate": "npm run db:generate -w @aegis/database"
   },
   "devDependencies": {

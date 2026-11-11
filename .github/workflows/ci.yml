@@ -2,9 +2,9 @@ name: Aegis Vault Continuous Integration
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   verify:
@@ -21,12 +21,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build internal packages
+        run: npm run build:packages
+
       - name: Run TypeScript typecheck
         run: npm run typecheck
 
-      - name: Run Cryptographic unit test suite
-        run: npm run test
+      - name: Run all test suites
+        run: npm run test:all
 
       - name: Run Application build
         run: npm run build
+
 

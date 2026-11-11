@@ -65,3 +65,4 @@ export function clearOfflineCache(): void {
   localStorage.removeItem(ENVELOPES_STORAGE_KEY);
   localStorage.removeItem(KEY_ENVELOPE_STORAGE_KEY);
 }
+

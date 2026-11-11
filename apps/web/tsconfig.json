@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@aegis/shared": ["../../packages/shared/src/index.ts"],
+      "@aegis/crypto": ["../../packages/crypto/src/index.ts"],
+      "@aegis/database": ["../../packages/database/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
